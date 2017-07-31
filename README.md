@@ -22,7 +22,9 @@ The text-editor contains about 209 lines of heavily commented code. Metapad will
 -About window: Contains info.
 
 -Exit functionalities with “Are you sure you want to quit?” dialog. Exit functionalities appear with: Pressing the escape key, with Alt+F4 combination or pressing the quit (x) button next to maximize.
+
 ____________________
+
 
 <b>Dependencies</b>
 
@@ -31,6 +33,7 @@ python-pyqt5 or python3-pyqt5 or similar.
 python or python3.
 
 Usually you need to install only something pointing towards python-pyqt5 or python3-pyqt5. By default python/python3 should already be installed within your Linux system.
+
 __________________________
 
 <b>Notes<b>
