@@ -36,7 +36,7 @@ Usually you need to install only something pointing towards python-pyqt5 or pyth
 
 __________________________
 
-<b>Notes<b>
+<b>Notes</b>
 
 Filters do not limit the file types you can use. Instead they give you a more filtered overview of your files. Filters do not add file type automatically. If you want to save as a txt file then do: somefile.txt as a file name. The default file type is plain text without an extension – unless the extension is specified.
 
