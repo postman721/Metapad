@@ -5,13 +5,15 @@ The text-editor contains about 204 lines of heavily commented code. Metapad will
 
 ![meta](https://user-images.githubusercontent.com/29865797/28796077-d9224e4e-7644-11e7-9c98-048baab3186e.jpg)
 
-#Metapad v.1 Copyright (c) 2017 JJ Posti <techtimejourney.net>
+#Metapad v.1.1 Copyright (c) 2017 JJ Posti <techtimejourney.net>
 #This program comes with ABSOLUTELY NO WARRANTY;
 #for details see: http://www.gnu.org/copyleft/gpl.html.
 #This is free software, and you are welcome to redistribute it under
 #GPL Version 2, June 1991″).
 
 <b>Features</b>
+
+Note.Metapad v.1.1 fixes Utf-8 support. In other words: there is only one version now.
 
 -Open file. Filters include: All files, Text files, Python files, C++ files, Bash files, Javascript files, Odt text files.
 
