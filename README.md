@@ -49,13 +49,6 @@ The style of Metapad is black and green oriented. The styling choices are CSS an
 __________________________
 
 
-<b>Two Versions</b>
-
-There are two versions. The regular version (metapad.py) does not contain ASCII support for characters like ä, ö, å.
-
-The scandic_unicode version (metapad_uc.py) does contain the previous support. The method of achieving utf_unicode support might lead to some potential problems on some Linux systems(depending on the distribution and Python version). On my tests, I did not notice anything going wrong. Still, to be sure, two versions of the program are given.
-________________
-
 <b>Executing</b>
 
 If needed make python files executable: chmod +x filename.py
