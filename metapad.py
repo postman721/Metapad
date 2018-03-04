@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-#Metapad v.1.1 Copyright (c) 2017 JJ Posti <techtimejourney.net> 
+#Metapad v.1.2 Copyright (c) 2017 JJ Posti <techtimejourney.net> 
 #This program comes with ABSOLUTELY NO WARRANTY; 
 #for details see: http://www.gnu.org/copyleft/gpl.html. 
 #This is free software, and you are welcome to redistribute it under 
 #GPL Version 2, June 1991")
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 #Importing modules. To make it easier we use * in some occasions to speed things up.
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -117,16 +117,16 @@ class Ui_MainWindow(object):
         if buttonReply == QMessageBox.Ok:
             print('Ok clicked, messagebox closed.')
             app.quit()
-            print "\n"
-            print "Program ends. Goodbye."
-            print "\n"    
+            print ("\n")
+            print ("Program ends. Goodbye.")
+            print ("\n")    
         if buttonReply == QMessageBox.Cancel:
-            print "Do not quit. --> Going back to the program."
+            print ("Do not quit. --> Going back to the program.")
             pass
         
 #About box
     def about(self):
-        buttonReply = QMessageBox.question(self.window, 'Metapad 1.1. Copyright (c) 2017 JJ Posti <techtimejourney.net> ', "Metapad is text-editor made with Python and QT5. The program comes with ABSOLUTELY NO WARRANTY  for details see: http://www.gnu.org/copyleft/gpl.html. This is free software, and you are welcome to redistribute it under GPL Version 2, June 1991. Additional keys: Escape key launches the quit prompt.", QMessageBox.Ok )
+        buttonReply = QMessageBox.question(self.window, 'Metapad 1.2. Copyright (c) 2017 JJ Posti <techtimejourney.net> ', "Metapad is text-editor made with Python and QT5. The program comes with ABSOLUTELY NO WARRANTY  for details see: http://www.gnu.org/copyleft/gpl.html. This is free software, and you are welcome to redistribute it under GPL Version 2, June 1991. Additional keys: Escape key launches the quit prompt.", QMessageBox.Ok )
         if buttonReply == QMessageBox.Ok:
             print('Ok clicked, messagebox closed.')
 
@@ -187,11 +187,11 @@ class Extra(QMainWindow):
             print('Ok clicked, messagebox closed.')
             event.accept()
             app.quit()
-            print "\n"
-            print "Program ends. Goodbye."
-            print "\n"    
+            print ("\n")
+            print ("Program ends. Goodbye.")
+            print ("\n")    
         if buttonReply == QMessageBox.Cancel:
-            print "Do not quit. --> Going back to the program."
+            print ("Do not quit. --> Going back to the program.")
             event.ignore() #This was pass in the quitting function.
 
 #The mainloop that gives us a visible program when binding things together.
