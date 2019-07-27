@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#Metapad v.1.2 Copyright (c) 2017 JJ Posti <techtimejourney.net> 
+#Metapad v.1.3 Copyright (c) 2017 JJ Posti <techtimejourney.net> 
 #This program comes with ABSOLUTELY NO WARRANTY; 
 #for details see: http://www.gnu.org/copyleft/gpl.html. 
 #This is free software, and you are welcome to redistribute it under 
@@ -50,15 +50,27 @@ class Ui_MainWindow(object):
  
         self.gridLayout = QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+
+#File indicator
+        self.toolbar = QToolBar()
+        self.toolbar.setObjectName(_fromUtf8("toolbar"))
+        self.address = QLabel()
+        self.result2='Open a file.'
+        self.address.setText(self.result2)
+        self.address.setStyleSheet("QLabel{color:#ffffff; background-color:#5c5c5c; border: 2px solid #353535; border-radius: 3px;font-size: 12px;}"
+        "QLabel:hover{background-color:#5c5c5c;}") 
+        self.address.setObjectName(_fromUtf8("lineEdit"))
+        self.toolbar.addWidget(self.address)
+        self.gridLayout.addWidget(self.toolbar, 0, 0, 1, 0)        
         self.textEdit = QTextEdit(self.centralwidget)
         self.textEdit.setStyleSheet(_fromUtf8("QTextEdit{\n"
 "background-color:#1b1a1a;\n"
 "color:green;\n"
 "}"))
         self.textEdit.setObjectName(_fromUtf8("textEdit"))
-        self.gridLayout.addWidget(self.textEdit, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.textEdit, 1, 1, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
-        
+
 #Menubar comes first and inside menubar there can be menus like "File".        
         self.menuBar = QMenuBar(MainWindow)
         self.menuBar.setGeometry(QtCore.QRect(0, 0, 800, 23))
@@ -122,11 +134,10 @@ class Ui_MainWindow(object):
             print ("\n")    
         if buttonReply == QMessageBox.Cancel:
             print ("Do not quit. --> Going back to the program.")
-            pass
-        
+            pass        
 #About box
     def about(self):
-        buttonReply = QMessageBox.question(self.window, 'Metapad 1.2. Copyright (c) 2017 JJ Posti <techtimejourney.net> ', "Metapad is text-editor made with Python and QT5. The program comes with ABSOLUTELY NO WARRANTY  for details see: http://www.gnu.org/copyleft/gpl.html. This is free software, and you are welcome to redistribute it under GPL Version 2, June 1991. Additional keys: Escape key launches the quit prompt.", QMessageBox.Ok )
+        buttonReply = QMessageBox.question(self.window, 'Metapad 1.3. Copyright (c) 2017 JJ Posti <techtimejourney.net> ', "Metapad is text-editor made with Python and QT5. The program comes with ABSOLUTELY NO WARRANTY  for details see: http://www.gnu.org/copyleft/gpl.html. This is free software, and you are welcome to redistribute it under GPL Version 2, June 1991. Additional keys: Escape key launches the quit prompt.", QMessageBox.Ok )
         if buttonReply == QMessageBox.Ok:
             print('Ok clicked, messagebox closed.')
 
@@ -135,12 +146,19 @@ class Ui_MainWindow(object):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
         fileName, _ = QFileDialog.getOpenFileName(self.window,"Open a file", "","All Files (*);;Text Files (*.txt);;Python Files (*.py);;C++ Files (*.cpp);;Bash Files (*.sh);;Javascript Files (*.js);;Odt text files (*.odt)", options=options)
+        url = QUrl.fromLocalFile(fileName)
         if fileName:
             f=open(fileName, 'r') #Opening in read-mode with 'r'.
             alltxt=f.read()
             self.textEdit.setText(alltxt)
             f.close() #Need to close the file.
-            
+#Format filename location correctly.           
+            filename = QFileInfo(str(url)).fileName()
+            self.result1 = filename.replace(')', '')
+            self.result2 = self.result1	.replace("'", '')
+            print (self.result2)
+            self.address.setText('Now viewing: ' + self.result2)            
+#Save file                                
     def saveFile(self):    
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
