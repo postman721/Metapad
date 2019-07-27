@@ -3,9 +3,9 @@ Metapad is a text-editor written with Python and QT5.
 
 The text-editor contains about 204 lines of heavily commented code. Metapad will be the default text-editor of the PostX Gnu/Linux 0.5(TBA).
 
-![meta](https://user-images.githubusercontent.com/29865797/28796077-d9224e4e-7644-11e7-9c98-048baab3186e.jpg)
+![metapad13](https://user-images.githubusercontent.com/29865797/61999894-dcc50c00-b0d3-11e9-98d7-78a558a01ca4.png)
 
-#Metapad v.1.1 Copyright (c) 2017 JJ Posti <techtimejourney.net>
+#Metapad v.1.3 Copyright (c) 2017 JJ Posti <techtimejourney.net>
 #This program comes with ABSOLUTELY NO WARRANTY;
 #for details see: http://www.gnu.org/copyleft/gpl.html.
 #This is free software, and you are welcome to redistribute it under
