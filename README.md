@@ -1,7 +1,7 @@
 # Metapad
 Metapad is a text-editor written with Python and QT5. 
 
-The text-editor contains about 204 lines of heavily commented code. Metapad will be the default text-editor of the PostX Gnu/Linux 0.5(TBA).
+The text-editor contains about 204 lines of heavily commented code. Metapad is the default text-editor of PostX Gnu/Linux.
 
 ![metapad13](https://user-images.githubusercontent.com/29865797/61999894-dcc50c00-b0d3-11e9-98d7-78a558a01ca4.png)
 
@@ -25,6 +25,7 @@ Note.Metapad v.1.1 fixes Utf-8 support. In other words: there is only one versio
 
 -Exit functionalities with “Are you sure you want to quit?” dialog. Exit functionalities appear with: Pressing the escape key, with Alt+F4 combination or pressing the quit (x) button next to maximize.
 
+Since 1.4: Zoom in and zoom out functionalities added to the menu.
 ____________________
 
 
