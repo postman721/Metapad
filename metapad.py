@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#Metapad v.1.3 Copyright (c) 2017 JJ Posti <techtimejourney.net> 
+#Metapad v.1.4 Copyright (c) 2017 JJ Posti <techtimejourney.net> 
 #This program comes with ABSOLUTELY NO WARRANTY; 
 #for details see: http://www.gnu.org/copyleft/gpl.html. 
 #This is free software, and you are welcome to redistribute it under 
@@ -101,6 +101,17 @@ class Ui_MainWindow(object):
         self.actionPrint = QAction(MainWindow)
         self.actionPrint.setObjectName(_fromUtf8("actionPrint"))
         self.actionPrint.triggered.connect(self.printing)
+
+
+#Zooms       
+        self.actionZoomins = QAction(MainWindow)
+        self.actionZoomins.setObjectName(_fromUtf8("actionZoomins"))
+        self.actionZoomins.triggered.connect(self.zoomins)
+
+        self.actionZoomouts = QAction(MainWindow)
+        self.actionZoomouts.setObjectName(_fromUtf8("actionZoomouts"))
+        self.actionZoomouts.triggered.connect(self.zoomouts)
+
 #About        
         self.actionAbout = QAction(MainWindow)
         self.actionAbout.setObjectName(_fromUtf8("actionAbout"))
@@ -115,6 +126,8 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addAction(self.actionSave)
         self.menuFile.addAction(self.actionPrint)
+        self.menuFile.addAction(self.actionZoomins)
+        self.menuFile.addAction(self.actionZoomouts)
         self.menuFile.addAction(self.actionAbout)
         self.menuFile.addAction(self.actionExit)
         self.menuBar.addAction(self.menuFile.menuAction()) #Add file menu actions to menubar        
@@ -137,7 +150,7 @@ class Ui_MainWindow(object):
             pass        
 #About box
     def about(self):
-        buttonReply = QMessageBox.question(self.window, 'Metapad 1.3. Copyright (c) 2017 JJ Posti <techtimejourney.net> ', "Metapad is text-editor made with Python and QT5. The program comes with ABSOLUTELY NO WARRANTY  for details see: http://www.gnu.org/copyleft/gpl.html. This is free software, and you are welcome to redistribute it under GPL Version 2, June 1991. Additional keys: Escape key launches the quit prompt.", QMessageBox.Ok )
+        buttonReply = QMessageBox.question(self.window, 'Metapad 1.4. Copyright (c) 2017 JJ Posti <techtimejourney.net> ', "Metapad is text-editor made with Python and QT5. The program comes with ABSOLUTELY NO WARRANTY  for details see: http://www.gnu.org/copyleft/gpl.html. This is free software, and you are welcome to redistribute it under GPL Version 2, June 1991. Additional keys: Escape key launches the quit prompt.", QMessageBox.Ok )
         if buttonReply == QMessageBox.Ok:
             print('Ok clicked, messagebox closed.')
 
@@ -167,6 +180,13 @@ class Ui_MainWindow(object):
             f=open(fileName, 'w') #Opening in write-mode with 'w'.
             f.write(self.textEdit.toPlainText())
             f.close() #Need to close the file.
+
+# Zoom functions.   
+    def zoomins(self):
+        self.textEdit.zoomIn(2)
+
+    def zoomouts(self):
+        self.textEdit.zoomOut(2)
            
 #Printing the page
     def printing(self):
@@ -183,6 +203,9 @@ class Ui_MainWindow(object):
         self.actionOpen.setText(_translate("MainWindow", "Open", None))
         self.actionSave.setText(_translate("MainWindow", "Save", None))
         self.actionPrint.setText(_translate("MainWindow", "Print", None))
+        self.actionZoomouts.setText(_translate("MainWindow", "Zoom out", None))
+        self.actionZoomins.setText(_translate("MainWindow", "Zoom in", None))
+
         self.actionAbout.setText(_translate("MainWindow", "About", None))
         self.actionExit.setText(_translate("MainWindow", "Exit", None))
 
