@@ -3,9 +3,9 @@ Metapad is a text-editor written with Python and QT5.
 
 The text-editor contains about 204 lines of heavily commented code. Metapad is the default text-editor of PostX Gnu/Linux.
 
-![metapad13](https://user-images.githubusercontent.com/29865797/61999894-dcc50c00-b0d3-11e9-98d7-78a558a01ca4.png)
+![meta](https://user-images.githubusercontent.com/29865797/111901978-b6d84200-8a43-11eb-878f-b92b1ff0216b.png)
 
-#Metapad v.1.3 Copyright (c) 2017 JJ Posti <techtimejourney.net>
+#Metapad v.1.5 Copyright (c) 2017 JJ Posti <techtimejourney.net>
 #This program comes with ABSOLUTELY NO WARRANTY;
 #for details see: http://www.gnu.org/copyleft/gpl.html.
 #This is free software, and you are welcome to redistribute it under
@@ -26,6 +26,8 @@ Note.Metapad v.1.1 fixes Utf-8 support. In other words: there is only one versio
 -Exit functionalities with “Are you sure you want to quit?” dialog. Exit functionalities appear with: Pressing the escape key, with Alt+F4 combination or pressing the quit (x) button next to maximize.
 
 Since 1.4: Zoom in and zoom out functionalities added to the menu.
+
+Since 1.5: Change font styling, Redo, Undo. -> All these are found from Actions menu.
 ____________________
 
 
