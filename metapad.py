@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#Metapad v.1.4 Copyright (c) 2017 JJ Posti <techtimejourney.net> 
+#Metapad v.1.5 Copyright (c) 2017 JJ Posti <techtimejourney.net> 
 #This program comes with ABSOLUTELY NO WARRANTY; 
 #for details see: http://www.gnu.org/copyleft/gpl.html. 
 #This is free software, and you are welcome to redistribute it under 
@@ -103,6 +103,20 @@ class Ui_MainWindow(object):
         self.actionPrint.triggered.connect(self.printing)
 
 
+#Undo        
+        self.actionUndo = QAction(MainWindow)
+        self.actionUndo.setObjectName(_fromUtf8("actionUndo"))
+        self.actionUndo.triggered.connect(self.undo)
+#Redo        
+        self.actionRedo = QAction(MainWindow)
+        self.actionRedo.setObjectName(_fromUtf8("actionRedo"))
+        self.actionRedo.triggered.connect(self.redo)
+
+#Font        
+        self.actionFont = QAction(MainWindow)
+        self.actionFont.setObjectName(_fromUtf8("actionFont"))
+        self.actionFont.triggered.connect(self.font)
+
 #Zooms       
         self.actionZoomins = QAction(MainWindow)
         self.actionZoomins.setObjectName(_fromUtf8("actionZoomins"))
@@ -126,11 +140,29 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addAction(self.actionSave)
         self.menuFile.addAction(self.actionPrint)
-        self.menuFile.addAction(self.actionZoomins)
-        self.menuFile.addAction(self.actionZoomouts)
         self.menuFile.addAction(self.actionAbout)
         self.menuFile.addAction(self.actionExit)
-        self.menuBar.addAction(self.menuFile.menuAction()) #Add file menu actions to menubar        
+        self.menuBar.addAction(self.menuFile.menuAction()) #Add file menu actions to menubar    
+        
+#Second menu
+
+        self.menuFile2 = QMenu(self.menuBar) #File menu is placed within menubar here.
+        self.menuFile2.setStyleSheet(_fromUtf8("QMenu{\n"
+"color:green;\n"
+"}"))
+
+#Add actions to file menu 2
+
+        self.menuFile2.addAction(self.actionUndo)
+        self.menuFile2.addAction(self.actionRedo)
+        self.menuFile2.addAction(self.actionZoomins)
+        self.menuFile2.addAction(self.actionZoomouts)
+        self.menuFile2.addAction(self.actionFont)
+        self.menuBar.addAction(self.menuFile2.menuAction()) #Add file menu2 actions to menubar   
+############File Menu defintions begin        
+        self.menuFile.setObjectName(_fromUtf8("menuFile"))
+        MainWindow.setMenuBar(self.menuBar) #Notify MainWindow about menuBar. 
+            
 #################################################
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -150,7 +182,7 @@ class Ui_MainWindow(object):
             pass        
 #About box
     def about(self):
-        buttonReply = QMessageBox.question(self.window, 'Metapad 1.4. Copyright (c) 2017 JJ Posti <techtimejourney.net> ', "Metapad is text-editor made with Python and QT5. The program comes with ABSOLUTELY NO WARRANTY  for details see: http://www.gnu.org/copyleft/gpl.html. This is free software, and you are welcome to redistribute it under GPL Version 2, June 1991. Additional keys: Escape key launches the quit prompt.", QMessageBox.Ok )
+        buttonReply = QMessageBox.question(self.window, 'Metapad 1.5. Copyright (c) 2017 JJ Posti <techtimejourney.net> ', "Metapad is text-editor made with Python and QT5. The program comes with ABSOLUTELY NO WARRANTY  for details see: http://www.gnu.org/copyleft/gpl.html. This is free software, and you are welcome to redistribute it under GPL Version 2, June 1991. Additional keys: Escape key launches the quit prompt.", QMessageBox.Ok )
         if buttonReply == QMessageBox.Ok:
             print('Ok clicked, messagebox closed.')
 
@@ -181,13 +213,27 @@ class Ui_MainWindow(object):
             f.write(self.textEdit.toPlainText())
             f.close() #Need to close the file.
 
-# Zoom functions.   
+#Zoom functions.   
     def zoomins(self):
         self.textEdit.zoomIn(2)
 
     def zoomouts(self):
         self.textEdit.zoomOut(2)
-           
+
+#Undo
+    def undo(self):
+        self.textEdit.undo()
+		
+#Redo
+    def redo(self):
+        self.textEdit.redo()
+        
+#Font - Change entire document font
+    def font(self):
+        font, ok = QFontDialog.getFont()
+        if ok:
+            self.textEdit.setCurrentFont(font)
+		           
 #Printing the page
     def printing(self):
         preview = QPrintPreviewDialog()
@@ -200,12 +246,15 @@ class Ui_MainWindow(object):
         self.window=MainWindow
         MainWindow.setWindowTitle(_translate("MainWindow", "Metapad", None))
         self.menuFile.setTitle(_translate("MainWindow", "File", None))
+        self.menuFile2.setTitle(_translate("MainWindow", "Actions", None))
         self.actionOpen.setText(_translate("MainWindow", "Open", None))
         self.actionSave.setText(_translate("MainWindow", "Save", None))
         self.actionPrint.setText(_translate("MainWindow", "Print", None))
         self.actionZoomouts.setText(_translate("MainWindow", "Zoom out", None))
         self.actionZoomins.setText(_translate("MainWindow", "Zoom in", None))
-
+        self.actionUndo.setText(_translate("MainWindow", "Undo", None))
+        self.actionRedo.setText(_translate("MainWindow", "Redo", None))
+        self.actionFont.setText(_translate("MainWindow", "Select font", None))
         self.actionAbout.setText(_translate("MainWindow", "About", None))
         self.actionExit.setText(_translate("MainWindow", "Exit", None))
 
