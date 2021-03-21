@@ -146,12 +146,12 @@ class Ui_MainWindow(object):
         
 #Second menu
 
-        self.menuFile2 = QMenu(self.menuBar) #File menu is placed within menubar here.
+        self.menuFile2 = QMenu(self.menuBar) #Actions menu is placed within menubar here.
         self.menuFile2.setStyleSheet(_fromUtf8("QMenu{\n"
 "color:green;\n"
 "}"))
 
-#Add actions to file menu 2
+#Add actions to Actions menu
 
         self.menuFile2.addAction(self.actionUndo)
         self.menuFile2.addAction(self.actionRedo)
@@ -159,7 +159,8 @@ class Ui_MainWindow(object):
         self.menuFile2.addAction(self.actionZoomouts)
         self.menuFile2.addAction(self.actionFont)
         self.menuBar.addAction(self.menuFile2.menuAction()) #Add file menu2 actions to menubar   
-############File Menu defintions begin        
+
+	############ Menu defintions begin        
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
         MainWindow.setMenuBar(self.menuBar) #Notify MainWindow about menuBar. 
             
