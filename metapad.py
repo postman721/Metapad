@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#Metapad v.1.5 Copyright (c) 2017 JJ Posti <techtimejourney.net> 
+#Metapad v.1.6 Copyright (c) 2017 JJ Posti <techtimejourney.net> 
 #This program comes with ABSOLUTELY NO WARRANTY; 
 #for details see: http://www.gnu.org/copyleft/gpl.html. 
 #This is free software, and you are welcome to redistribute it under 
@@ -13,7 +13,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtPrintSupport import QPrintPreviewDialog, QPrinter
 import subprocess, os, sys
-######
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -34,10 +33,7 @@ class Ui_MainWindow(object):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.resize(800, 600)
         MainWindow.setMouseTracking(True)
-        MainWindow.setStyleSheet(_fromUtf8("QMainWindow{\n"
-"background-color:#1b1a1a;\n"
-"color:green;\n"
-"}"))
+        MainWindow.setStyleSheet("background-color:#1b1a1a; color:green; selection-background-color:#080912;selection-color: #ffffff;")
         MainWindow.setDocumentMode(False)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
@@ -51,6 +47,14 @@ class Ui_MainWindow(object):
         self.gridLayout = QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
 
+#Toggle hide menus button
+        self.maxbutton=QCheckBox()
+        self.maxbutton.setStyleSheet("background-color:#ffffff; color:green;")
+        self.maxbutton.setCheckState(False)
+        self.maxbutton.setCheckable(True)
+        self.maxbutton.stateChanged.connect((self.max))
+        self.maxbutton.setToolTip("Hide/Show menus")
+
 #File indicator
         self.toolbar = QToolBar()
         self.toolbar.setObjectName(_fromUtf8("toolbar"))
@@ -61,6 +65,7 @@ class Ui_MainWindow(object):
         "QLabel:hover{background-color:#5c5c5c;}") 
         self.address.setObjectName(_fromUtf8("lineEdit"))
         self.toolbar.addWidget(self.address)
+        self.toolbar.addWidget(self.maxbutton)
         self.gridLayout.addWidget(self.toolbar, 0, 0, 1, 0)        
         self.textEdit = QTextEdit(self.centralwidget)
         self.textEdit.setStyleSheet(_fromUtf8("QTextEdit{\n"
@@ -82,6 +87,7 @@ class Ui_MainWindow(object):
         self.menuFile.setStyleSheet(_fromUtf8("QMenu{\n"
 "color:green;\n"
 "}"))
+
 
 ############File Menu defintions begin        
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -145,14 +151,12 @@ class Ui_MainWindow(object):
         self.menuBar.addAction(self.menuFile.menuAction()) #Add file menu actions to menubar    
         
 #Second menu
-
         self.menuFile2 = QMenu(self.menuBar) #Actions menu is placed within menubar here.
         self.menuFile2.setStyleSheet(_fromUtf8("QMenu{\n"
 "color:green;\n"
 "}"))
 
 #Add actions to Actions menu
-
         self.menuFile2.addAction(self.actionUndo)
         self.menuFile2.addAction(self.actionRedo)
         self.menuFile2.addAction(self.actionZoomins)
@@ -180,10 +184,22 @@ class Ui_MainWindow(object):
             print ("\n")    
         if buttonReply == QMessageBox.Cancel:
             print ("Do not quit. --> Going back to the program.")
-            pass        
+            pass 
+
+#Hide menus 
+    def max(self):
+        if self.maxbutton.isChecked():			
+            #Hide menus
+                self.menuBar.hide()
+            #Hide toolbar
+                self.address.hide()            
+        else:
+            self.menuBar.show()
+            self.toolbar.show()              
+                   
 #About box
     def about(self):
-        buttonReply = QMessageBox.question(self.window, 'Metapad 1.5. Copyright (c) 2017 JJ Posti <techtimejourney.net> ', "Metapad is text-editor made with Python and QT5. The program comes with ABSOLUTELY NO WARRANTY  for details see: http://www.gnu.org/copyleft/gpl.html. This is free software, and you are welcome to redistribute it under GPL Version 2, June 1991. Additional keys: Escape key launches the quit prompt.", QMessageBox.Ok )
+        buttonReply = QMessageBox.question(self.window, 'Metapad 1.6. Copyright (c) 2017 JJ Posti <techtimejourney.net> ', "Metapad is text-editor made with Python and QT5. The program comes with ABSOLUTELY NO WARRANTY  for details see: http://www.gnu.org/copyleft/gpl.html. This is free software, and you are welcome to redistribute it under GPL Version 2, June 1991. Additional keys: Escape key launches the quit prompt.", QMessageBox.Ok )
         if buttonReply == QMessageBox.Ok:
             print('Ok clicked, messagebox closed.')
 
