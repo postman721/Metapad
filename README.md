@@ -1,67 +1,34 @@
-# Metapad
-Metapad is a text-editor written with Python and QT5. 
+# Metapad v 2.0
 
+Metapad is a robust PyQt5-based text editor that aims to provide a simple yet efficient interface for reading and writing text files. It comes with features such as line numbers, basic text formatting, and an intuitive toolbar for quick actions.
 
-![me16](https://user-images.githubusercontent.com/29865797/128564911-d9fd98ed-8577-4de2-b546-bac8ccb7af90.png)
+## Features:
+- **Line Numbers**: Clearly visualized line numbers next to your text.
+- **Toolbar**: A toolbar for quick actions such as undo, redo, save, open, print, and font selection.
+- **Styling**: Custom styling for the editor and the application, done via CSS styling. Icons are from Adwaita icons theme. Without icons a button with a text will be shown.
+- **Font Change**: Quickly change the font of the selected text.
+- **Open/Save Dialog**: Intuitive dialogs for opening and saving your files.
+- **Printing**: A print preview and printing capability.
+- **Protection**: Before closing or opening new files, a warning is given if there are unsaved changes.
 
-#Metapad v.1.6 Copyright (c) 2017 JJ Posti <techtimejourney.net>
-#This program comes with ABSOLUTELY NO WARRANTY;
-#for details see: http://www.gnu.org/copyleft/gpl.html.
-#This is free software, and you are welcome to redistribute it under
-#GPL Version 2, June 1991″).
+## Dependencies:
 
-<b>Features</b>
+- **PyQt5**: For the main GUI components.
+- **PyQt5.QtPrintSupport**: For print preview and printing capabilities.
+- **subprocess, os, sys**: Other Python libraries for various tasks.
 
+## Copyright:
 
+Metapad v.2.0 is Copyright (c) 2017 by JJ Posti <techtimejourney.net>. This program comes with ABSOLUTELY NO WARRANTY; for details see: http://www.gnu.org/copyleft/gpl.html. Metapad is free software, and you are welcome to redistribute it under GPL Version 2, June 1991.
 
-Note.Metapad v.1.1 fixes Utf-8 support. In other words: there is only one version now.
+## Installation:
 
--Open file. Filters include: All files, Text files, Python files, C++ files, Bash files, Javascript files, Odt text files.
+Before you run Metapad, ensure you have the required dependencies installed.
 
--Save file, a.k.a. the save as functionality. Filters include: All files, Python files, C++ files, Bash files, Javascript files, Odt text files.
+```bash
+pip install PyQt5
 
--Print functionality. Print also gives you an option to create a PDF out of your work with a print to a PDF file functionality.
+Debian/Ubuntu:
 
--About window: Contains info.
-
--Exit functionalities with “Are you sure you want to quit?” dialog. Exit functionalities appear with: Pressing the escape key, with Alt+F4 combination or pressing the quit (x) button next to maximize.
-
-Since 1.4: Zoom in and zoom out functionalities added to the menu.
-
-Since 1.5: Change font styling, Redo, Undo. -> All these are found from Actions menu.
-
-Since 1.6: Toggle hide/show menus. Consistent dark style.
-____________________
-
-
-<b>Dependencies</b>
-
-python-pyqt5 or python3-pyqt5 or similar.
-
-python or python3.
-
-Usually you need to install only something pointing towards python-pyqt5 or python3-pyqt5. By default python/python3 should already be installed within your Linux system.
-
-__________________________
-
-<b>Notes</b>
-
-Filters do not limit the file types you can use. Instead they give you a more filtered overview of your files. Filters do not add file type automatically. If you want to save as a txt file then do: somefile.txt as a file name. The default file type is plain text without an extension – unless the extension is specified.
-
-Odt files can be opened and you can save to odt – if the file in question contains only text. At its current state Metapad does not support image loading/saving. I might add image functionalities in the future.
-
-The style of Metapad is black and green oriented. The styling choices are CSS and as such they do not change the way the actual text appears on a paper or in a file. For example, if you save something it is going to be black, regular text in a white paper.
-
-__________________________
-
-
-<b>Executing</b>
-
-If needed make python files executable: chmod +x filename.py
-
-Run with: python filename_location.py
-
-____
-Original post is at: http://www.techtimejourney.net/metapad-text-editor-arrives/
-
-
+sudo apt-get install python3-pyqt5
+sudo apt-get install adwaita-icon-theme
