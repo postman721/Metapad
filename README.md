@@ -34,3 +34,5 @@ Debian/Ubuntu:
 
 sudo apt-get install python3-pyqt5
 sudo apt-get install adwaita-icon-theme
+
+Running example: python3 metapad.py
