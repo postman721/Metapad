@@ -1,5 +1,7 @@
 # Metapad v 2.0
 
+![metapad](https://github.com/postman721/Metapad/assets/29865797/c516a953-257c-4cfb-b892-d59130dc7841)
+
 Metapad is a robust PyQt5-based text editor that aims to provide a simple yet efficient interface for reading and writing text files. It comes with features such as line numbers, basic text formatting, and an intuitive toolbar for quick actions.
 
 ## Features:
