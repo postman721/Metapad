@@ -407,7 +407,7 @@ class MainWindow(QMainWindow):
                 border: 1px solid #2D3643; 
                 border-radius: 6px; 
                 font-size: 15px; 
-                selection-background-color: #404A58; 
+                selection-background-color: #abbac4; 
                 padding: 6px;
             }
         """)
