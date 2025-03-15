@@ -5,6 +5,12 @@
 Metapad is a robust PyQt5-based text editor that aims to provide a simple yet efficient interface for reading and writing text files. It comes with features such as line numbers, basic text formatting, and an intuitive toolbar for quick actions.
 
 
+#### Metapad 3.1
+
+        python3 metapad.py filename_to_open
+Added open new empty file to menu seciton.
+
+
 ### Metapad 3.0
 
 Highlights of the Improvements
