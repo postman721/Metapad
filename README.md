@@ -1,4 +1,4 @@
-# Metapad v 3.0
+# Metapad v 3.1
 
 ![Image](https://github.com/user-attachments/assets/f96b33de-4ebb-476b-995c-f0a86bc0d6fd)
 
