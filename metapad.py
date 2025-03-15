@@ -76,77 +76,6 @@ class QLineNumberArea(QWidget):
         self.metapad.lineNumberAreaPaintEvent(event)
 
 
-# ---- Main Editor (Metapad) ----
-class Metapad(QPlainTextEdit):
-    cursorPositionChangedSignal = pyqtSignal(int, int)  # custom signal to update line/col in status bar
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.lineNumberArea = QLineNumberArea(self)
-        self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
-        self.updateRequest.connect(self.updateLineNumberArea)
-        self.updateLineNumberAreaWidth(0)
-
-        # Connect cursor position changes to a method that emits line/col
-        self.cursorPositionChanged.connect(self.onCursorPositionChanged)
-
-    def lineNumberAreaWidth(self):
-        digits = 1
-        max_value = max(1, self.blockCount())
-        while max_value >= 10:
-            max_value //= 10
-            digits += 1
-        space = 3 + self.fontMetrics().width('9') * digits
-        return space
-
-    def updateLineNumberAreaWidth(self, _):
-        self.setViewportMargins(self.lineNumberAreaWidth(), 0, 0, 0)
-
-    def updateLineNumberArea(self, rect, dy):
-        if dy:
-            self.lineNumberArea.scroll(0, dy)
-        else:
-            self.lineNumberArea.update(0, rect.y(), 
-                                       self.lineNumberArea.size().width(), 
-                                       rect.height())
-        if rect.contains(self.viewport().rect()):
-            self.updateLineNumberAreaWidth(0)
-
-    def resizeEvent(self, event):
-        super().resizeEvent(event)
-        cr = self.contentsRect()
-        self.lineNumberArea.setGeometry(QRect(cr.left(), cr.top(), 
-                                              self.lineNumberAreaWidth(), cr.height()))
-
-    def lineNumberAreaPaintEvent(self, event):
-        painter = QPainter(self.lineNumberArea)
-        painter.fillRect(event.rect(), Qt.yellow)
-
-        block = self.firstVisibleBlock()
-        blockNumber = block.blockNumber()
-        top = int(self.blockBoundingGeometry(block).translated(self.contentOffset()).top())
-        bottom = top + self.blockBoundingRect(block).height()
-        height = self.fontMetrics().height()
-
-        while block.isValid() and (top <= event.rect().bottom()):
-            number = str(blockNumber + 1)
-            painter.setPen(Qt.black)
-            painter.drawText(0, top, self.lineNumberArea.width(), height, 
-                             Qt.AlignCenter, number)
-            block = block.next()
-            top = int(bottom)
-            bottom = top + self.blockBoundingRect(block).height()
-            blockNumber += 1
-
-    def onCursorPositionChanged(self):
-        # Emit current line and column.
-        # Calculate column as the difference between the cursor's absolute position and the block's position.
-        cursor = self.textCursor()
-        line = cursor.blockNumber() + 1
-        col = cursor.position() - cursor.block().position() + 1
-        self.cursorPositionChangedSignal.emit(line, col)
-
-
 # ---- Find & Replace Dialog ----
 class FindReplaceDialog(QDialog):
     def __init__(self, parent=None, editor=None):
@@ -251,6 +180,77 @@ class FindReplaceDialog(QDialog):
         QMessageBox.information(self, "Replace All", f"Replaced {count} occurrence(s).")
 
 
+# ---- Main Editor (Metapad) ----
+class Metapad(QPlainTextEdit):
+    cursorPositionChangedSignal = pyqtSignal(int, int)  # custom signal to update line/col in status bar
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.lineNumberArea = QLineNumberArea(self)
+        self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
+        self.updateRequest.connect(self.updateLineNumberArea)
+        self.updateLineNumberAreaWidth(0)
+
+        # Connect cursor position changes to a method that emits line/col
+        self.cursorPositionChanged.connect(self.onCursorPositionChanged)
+
+    def lineNumberAreaWidth(self):
+        digits = 1
+        max_value = max(1, self.blockCount())
+        while max_value >= 10:
+            max_value //= 10
+            digits += 1
+        space = 3 + self.fontMetrics().width('9') * digits
+        return space
+
+    def updateLineNumberAreaWidth(self, _):
+        self.setViewportMargins(self.lineNumberAreaWidth(), 0, 0, 0)
+
+    def updateLineNumberArea(self, rect, dy):
+        if dy:
+            self.lineNumberArea.scroll(0, dy)
+        else:
+            self.lineNumberArea.update(0, rect.y(), 
+                                       self.lineNumberArea.size().width(), 
+                                       rect.height())
+        if rect.contains(self.viewport().rect()):
+            self.updateLineNumberAreaWidth(0)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        cr = self.contentsRect()
+        self.lineNumberArea.setGeometry(QRect(cr.left(), cr.top(), 
+                                              self.lineNumberAreaWidth(), cr.height()))
+
+    def lineNumberAreaPaintEvent(self, event):
+        painter = QPainter(self.lineNumberArea)
+        painter.fillRect(event.rect(), Qt.yellow)
+
+        block = self.firstVisibleBlock()
+        blockNumber = block.blockNumber()
+        top = int(self.blockBoundingGeometry(block).translated(self.contentOffset()).top())
+        bottom = top + self.blockBoundingRect(block).height()
+        height = self.fontMetrics().height()
+
+        while block.isValid() and (top <= event.rect().bottom()):
+            number = str(blockNumber + 1)
+            painter.setPen(Qt.black)
+            painter.drawText(0, top, self.lineNumberArea.width(), height, 
+                             Qt.AlignCenter, number)
+            block = block.next()
+            top = int(bottom)
+            bottom = top + self.blockBoundingRect(block).height()
+            blockNumber += 1
+
+    def onCursorPositionChanged(self):
+        # Emit current line and column.
+        # Calculate column as the difference between the cursor's absolute position and the block's position.
+        cursor = self.textCursor()
+        line = cursor.blockNumber() + 1
+        col = cursor.position() - cursor.block().position() + 1
+        self.cursorPositionChangedSignal.emit(line, col)
+
+
 # ---- MainWindow ----
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -277,6 +277,12 @@ class MainWindow(QMainWindow):
         open_action = QAction(open_icon, 'Open', self)
         open_action.triggered.connect(self.openFile)
         self.toolbar.addAction(open_action)
+
+        # New File
+        new_icon = QIcon.fromTheme("document-new")
+        new_action = QAction(new_icon, 'New', self)
+        new_action.triggered.connect(self.newFile)
+        self.toolbar.addAction(new_action)
 
         # Undo
         undo_icon = QIcon.fromTheme("edit-undo")
@@ -326,6 +332,7 @@ class MainWindow(QMainWindow):
 
         # File menu
         file_menu = menubar.addMenu("File")
+        file_menu.addAction(new_action)  # New action added
         file_menu.addAction(open_action)
         file_menu.addAction(save_action)
         file_menu.addAction(print_action)
@@ -420,6 +427,20 @@ class MainWindow(QMainWindow):
         # Keep reference to Find & Replace dialog
         self.find_replace_dialog = None
 
+        # Check if a file was passed as argument and open it
+        if len(sys.argv) > 1:
+            self.openFileFromCommandLine(sys.argv[1])
+
+    # ----- New File Method -----
+    def newFile(self):
+        """Create a new empty file."""
+        reply = QMessageBox.question(self, 'New File',
+                                     'Do you want to discard changes and start a new file?',
+                                     QMessageBox.Yes | QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            self.metapad.clear()  # Clear the editor contents
+            self.address.setText('New File')  # Reset file path label
+
     # ----- Additional Feature Methods -----
 
     def updateStatusBar(self, line, col):
@@ -448,7 +469,15 @@ class MainWindow(QMainWindow):
         self.find_replace_dialog.raise_()
         self.find_replace_dialog.activateWindow()
 
-    # ----- Original Methods (with minor adjustments) -----
+    def openFileFromCommandLine(self, filepath):
+        """Open file from command-line argument."""
+        if os.path.exists(filepath):
+            with open(filepath, 'r', encoding='utf-8', errors='ignore') as file:
+                self.metapad.setPlainText(file.read())
+            self.address.setText(f'Now viewing: {os.path.basename(filepath)}')
+        else:
+            QMessageBox.warning(self, "File Not Found", f"Cannot find file: {filepath}")
+
     def changeFont(self):
         font, ok = QFontDialog.getFont(self.metapad.font(), self, 
                                        'Select a font (applies to selected text if present).')
@@ -476,7 +505,6 @@ class MainWindow(QMainWindow):
             print("\nProgram ends. Goodbye.\n")
         else:
             print("Do not quit. --> Going back to the program.")
-            event.ignore()
 
     def openFile(self):
         try:
@@ -542,8 +570,8 @@ class MainWindow(QMainWindow):
             print("Do not quit. --> Going back to the program.")
 
     def showAbout(self):
-        QMessageBox.information(self, "About Metapad v3.0",
-                                "Metapad v3.0\n\n"
+        QMessageBox.information(self, "About Metapad v3.1",
+                                "Metapad v3.1\n\n"
                                 "Copyright (c) 2017 JJ Posti <techtimejourney.net>\n"
                                 "Improved Features Example\n\n"
                                 "This program comes with ABSOLUTELY NO WARRANTY.\n"
