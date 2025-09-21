@@ -1,66 +1,108 @@
-from PyQt5.QtCore import (Qt, QRegExp, QRect, QUrl, QSize, pyqtSignal)
-from PyQt5.QtGui import (QFont, QIcon, QPainter, QTextCharFormat, QSyntaxHighlighter, 
-                         QTextCursor, QColor, QTextDocument)
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QPlainTextEdit,
-                             QToolBar, QAction, QLabel, QFileDialog, QMessageBox, 
-                             QFontDialog, QInputDialog, QDialog, QVBoxLayout, 
-                             QHBoxLayout, QPushButton, QLineEdit, QCheckBox)
-from PyQt5.QtPrintSupport import QPrintPreviewDialog
+#!/usr/bin/env python3
+# Metapad (PyQt6 / PyQt5 compatible)
+# White-paper UI
+# GPL v2
+
 import sys, os
 
-# ---- Syntax Highlighter (Optional) ----
+# --- Try PyQt6 first, fallback to PyQt5 ---
+try:
+    from PyQt6.QtCore import (Qt, QRegularExpression, QRect, QUrl, QSize, pyqtSignal)
+    from PyQt6.QtGui import (QFont, QPainter, QTextCharFormat, QSyntaxHighlighter,
+                             QTextCursor, QColor, QAction, QPalette, QTextDocument)
+    from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QPlainTextEdit,
+                                 QToolBar, QLabel, QFileDialog, QMessageBox,
+                                 QFontDialog, QInputDialog, QDialog, QVBoxLayout,
+                                 QHBoxLayout, QPushButton, QLineEdit, QCheckBox)
+    from PyQt6.QtPrintSupport import QPrintPreviewDialog, QPrinter, QPrintDialog
+    USING_QT6 = True
+    print("Using PyQt6")
+except ImportError:
+    from PyQt5.QtCore import (Qt, QRegExp, QRect, QUrl, QSize, pyqtSignal)
+    from PyQt5.QtGui import (QFont, QPainter, QTextCharFormat, QSyntaxHighlighter,
+                             QTextCursor, QColor, QPalette, QTextDocument)
+    from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QPlainTextEdit,
+                                 QToolBar, QLabel, QFileDialog, QMessageBox,
+                                 QFontDialog, QInputDialog, QDialog, QVBoxLayout,
+                                 QHBoxLayout, QPushButton, QLineEdit, QCheckBox, QAction)
+    from PyQt5.QtPrintSupport import QPrintPreviewDialog, QPrinter, QPrintDialog
+    USING_QT6 = False
+    print("Using PyQt5")
+
+# --- Cross-version QMessageBox buttons ---
+if USING_QT6:
+    MB_OK = QMessageBox.StandardButton.Ok
+    MB_CANCEL = QMessageBox.StandardButton.Cancel
+    MB_YES = QMessageBox.StandardButton.Yes
+    MB_NO = QMessageBox.StandardButton.No
+else:
+    MB_OK = QMessageBox.Ok
+    MB_CANCEL = QMessageBox.Cancel
+    MB_YES = QMessageBox.Yes
+    MB_NO = QMessageBox.No
+
+# --- Safe file dialog options helper ---
+def file_dialog_options():
+    """
+    Return a safe 'options' value for QFileDialog across PyQt5/6.
+    Avoids crashes on builds missing Options/Option attributes.
+    """
+    Option = getattr(QFileDialog, "Option", None)
+    if Option is not None:
+        try:
+            opts = Option(0)
+            dont = getattr(Option, "DontUseNativeDialog", None)
+            if dont is not None:
+                opts |= dont
+            return opts
+        except Exception:
+            pass
+    Options = getattr(QFileDialog, "Options", None)
+    if Options is not None:
+        try:
+            opts = Options()
+            if hasattr(QFileDialog, "DontUseNativeDialog"):
+                opts |= QFileDialog.DontUseNativeDialog
+            return opts
+        except Exception:
+            pass
+    return getattr(QFileDialog, "DontUseNativeDialog", 0) or 0
+
+
+# ---- Syntax Highlighter (comments + strings only; keywords removed) ----
 class PythonHighlighter(QSyntaxHighlighter):
-    """A basic Python syntax highlighter."""
+    """Minimal Python syntax highlighter (comments & strings)."""
     def __init__(self, parent=None):
         super().__init__(parent)
         self.init_highlighting_rules()
 
     def init_highlighting_rules(self):
-        # Generic format
-        keyword_format = QTextCharFormat()
-        keyword_format.setForeground(Qt.cyan)
-        keyword_format.setFontWeight(QFont.Bold)
-
-        # Comments
         comment_format = QTextCharFormat()
-        comment_format.setForeground(Qt.green)
+        comment_format.setForeground(QColor("#6a737d"))  # grey
 
-        # Strings
         string_format = QTextCharFormat()
-        string_format.setForeground(Qt.yellow)
-
-        # Python Keywords
-        keywords = [
-            'and', 'as', 'assert', 'break', 'class', 'continue', 'def',
-            'del', 'elif', 'else', 'except', 'False', 'finally', 'for',
-            'from', 'global', 'if', 'import', 'in', 'is', 'lambda',
-            'None', 'nonlocal', 'not', 'or', 'pass', 'raise', 'return',
-            'True', 'try', 'while', 'with', 'yield'
-        ]
+        string_format.setForeground(QColor("#d14"))      # red-ish
 
         self.highlighting_rules = []
-        # Keyword patterns
-        for word in keywords:
-            pattern = r'\b' + word + r'\b'
-            self.highlighting_rules.append((pattern, keyword_format))
-
-        # Comment pattern (start with # until end of line)
         self.highlighting_rules.append((r'#[^\n]*', comment_format))
-
-        # String patterns
-        # Single-quoted string
-        self.highlighting_rules.append((r'\'[^\']*\'', string_format))
-        # Double-quoted string
-        self.highlighting_rules.append((r'\"[^\"]*\"', string_format))
+        self.highlighting_rules.append((r"'[^']*'", string_format))
+        self.highlighting_rules.append((r'"[^"]*"', string_format))
 
     def highlightBlock(self, text):
         for pattern, fmt in self.highlighting_rules:
-            expression = QRegExp(pattern)
-            index = expression.indexIn(text)
-            while index >= 0:
-                length = expression.matchedLength()
-                self.setFormat(index, length, fmt)
-                index = expression.indexIn(text, index + length)
+            if USING_QT6:
+                regex = QRegularExpression(pattern)
+                match = regex.globalMatch(text)
+                while match.hasNext():
+                    m = match.next()
+                    self.setFormat(m.capturedStart(), m.capturedLength(), fmt)
+            else:
+                regex = QRegExp(pattern)
+                index = regex.indexIn(text)
+                while index >= 0:
+                    length = regex.matchedLength()
+                    self.setFormat(index, length, fmt)
+                    index = regex.indexIn(text, index + length)
 
 
 # ---- Line Number Area ----
@@ -127,19 +169,27 @@ class FindReplaceDialog(QDialog):
         self.replace_all_button.clicked.connect(self.replace_all)
 
     def find_flags(self):
-        """Returns appropriate QTextDocument.FindFlags based on user selections."""
-        flags = QTextDocument.FindFlags()  # default flags (i.e. 0)
-        if self.match_case_checkbox.isChecked():
-            flags |= QTextDocument.FindCaseSensitively
-        return flags
+        """Return flags for QPlainTextEdit.find, cross-version safe."""
+        if USING_QT6:
+            flags = QTextDocument.FindFlag(0)
+            if self.match_case_checkbox.isChecked():
+                flags |= QTextDocument.FindFlag.FindCaseSensitively
+            return flags
+        else:
+            flags = QTextDocument.FindFlags()
+            if self.match_case_checkbox.isChecked():
+                flags |= QTextDocument.FindCaseSensitively
+            return flags
 
     def find_next(self):
         text = self.find_input.text()
         if text:
             if not self.editor.find(text, self.find_flags()):
-                # If not found, move cursor to start and try again
                 cursor = self.editor.textCursor()
-                cursor.movePosition(QTextCursor.Start)
+                if USING_QT6:
+                    cursor.movePosition(QTextCursor.MoveOperation.Start)
+                else:
+                    cursor.movePosition(QTextCursor.Start)
                 self.editor.setTextCursor(cursor)
                 self.editor.find(text, self.find_flags())
 
@@ -149,26 +199,26 @@ class FindReplaceDialog(QDialog):
         cursor = self.editor.textCursor()
 
         if not cursor.hasSelection():
-            # Find next occurrence first
             self.find_next()
             return
 
-        # If the selected text matches, replace
-        if (cursor.selectedText() == text_find or 
-            (not self.match_case_checkbox.isChecked() and cursor.selectedText().lower() == text_find.lower())):
+        selected = cursor.selectedText()
+        if (selected == text_find or
+            (not self.match_case_checkbox.isChecked() and selected.lower() == text_find.lower())):
             cursor.insertText(text_replace)
-        self.find_next()  # Move on to the next occurrence
+        self.find_next()
 
     def replace_all(self):
         text_find = self.find_input.text()
         text_replace = self.replace_input.text()
-
         if not text_find:
             return
 
-        # Move cursor to the start
         cursor = self.editor.textCursor()
-        cursor.movePosition(QTextCursor.Start)
+        if USING_QT6:
+            cursor.movePosition(QTextCursor.MoveOperation.Start)
+        else:
+            cursor.movePosition(QTextCursor.Start)
         self.editor.setTextCursor(cursor)
 
         count = 0
@@ -177,12 +227,13 @@ class FindReplaceDialog(QDialog):
             cursor.insertText(text_replace)
             count += 1
 
-        QMessageBox.information(self, "Replace All", f"Replaced {count} occurrence(s).")
+        QMessageBox.information(self, "Replace All",
+                                f"Replaced {count} occurrence(s).", MB_OK)
 
 
 # ---- Main Editor (Metapad) ----
 class Metapad(QPlainTextEdit):
-    cursorPositionChangedSignal = pyqtSignal(int, int)  # custom signal to update line/col in status bar
+    cursorPositionChangedSignal = pyqtSignal(int, int)  # line, col
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -190,17 +241,14 @@ class Metapad(QPlainTextEdit):
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
         self.updateRequest.connect(self.updateLineNumberArea)
         self.updateLineNumberAreaWidth(0)
-
-        # Connect cursor position changes to a method that emits line/col
         self.cursorPositionChanged.connect(self.onCursorPositionChanged)
 
     def lineNumberAreaWidth(self):
-        digits = 1
-        max_value = max(1, self.blockCount())
-        while max_value >= 10:
-            max_value //= 10
-            digits += 1
-        space = 3 + self.fontMetrics().width('9') * digits
+        digits = len(str(max(1, self.blockCount())))
+        if USING_QT6:
+            space = 6 + self.fontMetrics().horizontalAdvance('9') * digits
+        else:
+            space = 6 + self.fontMetrics().width('9') * digits
         return space
 
     def updateLineNumberAreaWidth(self, _):
@@ -210,8 +258,8 @@ class Metapad(QPlainTextEdit):
         if dy:
             self.lineNumberArea.scroll(0, dy)
         else:
-            self.lineNumberArea.update(0, rect.y(), 
-                                       self.lineNumberArea.size().width(), 
+            self.lineNumberArea.update(0, rect.y(),
+                                       self.lineNumberArea.size().width(),
                                        rect.height())
         if rect.contains(self.viewport().rect()):
             self.updateLineNumberAreaWidth(0)
@@ -219,12 +267,12 @@ class Metapad(QPlainTextEdit):
     def resizeEvent(self, event):
         super().resizeEvent(event)
         cr = self.contentsRect()
-        self.lineNumberArea.setGeometry(QRect(cr.left(), cr.top(), 
+        self.lineNumberArea.setGeometry(QRect(cr.left(), cr.top(),
                                               self.lineNumberAreaWidth(), cr.height()))
 
     def lineNumberAreaPaintEvent(self, event):
         painter = QPainter(self.lineNumberArea)
-        painter.fillRect(event.rect(), Qt.yellow)
+        painter.fillRect(event.rect(), QColor("#f5f5f5"))
 
         block = self.firstVisibleBlock()
         blockNumber = block.blockNumber()
@@ -234,232 +282,239 @@ class Metapad(QPlainTextEdit):
 
         while block.isValid() and (top <= event.rect().bottom()):
             number = str(blockNumber + 1)
-            painter.setPen(Qt.black)
-            painter.drawText(0, top, self.lineNumberArea.width(), height, 
-                             Qt.AlignCenter, number)
+            painter.setPen(QColor("#888"))
+            align = (Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+                     if USING_QT6 else Qt.AlignRight | Qt.AlignVCenter)
+            painter.drawText(0, top, self.lineNumberArea.width() - 4, height, align, number)
             block = block.next()
             top = int(bottom)
             bottom = top + self.blockBoundingRect(block).height()
             blockNumber += 1
 
     def onCursorPositionChanged(self):
-        # Emit current line and column.
-        # Calculate column as the difference between the cursor's absolute position and the block's position.
         cursor = self.textCursor()
         line = cursor.blockNumber() + 1
         col = cursor.position() - cursor.block().position() + 1
         self.cursorPositionChangedSignal.emit(line, col)
 
 
-# ---- MainWindow ----
+# ---- Main Window ----
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Metapad")
+        self.resize(900, 640)
 
-        # Center on screen
-        self.move(QApplication.desktop().screen().rect().center() - self.rect().center())
-
-        # Create the text editor
+        # Editor
         self.metapad = Metapad(self)
-        self.resize(800, 600)
+        self.setCentralWidget(self.metapad)
 
-        # (Optional) Syntax highlighting for Python
+        # Syntax highlighting (no keywords)
         self.highlighter = PythonHighlighter(self.metapad.document())
 
-        # Create main toolbar
+        # Status bar
+        self.status = self.statusBar()
+        self.status.showMessage("Ready")
+        self.metapad.cursorPositionChangedSignal.connect(self.updateStatusBar)
+
+        # Address toolbar (file info)
+        self.address_toolbar = QToolBar("File")
+        self.addToolBar(self.address_toolbar)
+        self.address = QLabel('')
+        self.address_toolbar.addWidget(self.address)
+
+        # Toolbars & Menus
+        self.createToolbarsAndMenus()
+
+        # Styling (white-paper)
+        self.applyStyles()
+
+        # Default font
+        font = QFont()
+        font.setPointSize(13)
+        self.setFont(font)
+
+        # Keep reference to modeless Find/Replace dialog
+        self.find_replace_dialog = None
+
+        # Center on screen after sizing
+        self.centerOnScreen()
+
+        # Open file from CLI
+        if len(sys.argv) > 1:
+            self.openFileFromCommandLine(sys.argv[1])
+
+    # ---- UI builders ----
+    def createToolbarsAndMenus(self):
         self.toolbar = QToolBar("Main Toolbar")
         self.addToolBar(self.toolbar)
 
-        # -------- Add actions to the toolbar --------
-        # Open
-        open_icon = QIcon.fromTheme("document-open")
-        open_action = QAction(open_icon, 'Open', self)
-        open_action.triggered.connect(self.openFile)
-        self.toolbar.addAction(open_action)
 
-        # New File
-        new_icon = QIcon.fromTheme("document-new")
-        new_action = QAction(new_icon, 'New', self)
-        new_action.triggered.connect(self.newFile)
-        self.toolbar.addAction(new_action)
+        self.open_action = QAction('Open', self)
+        self.open_action.triggered.connect(self.openFile)
 
-        # Undo
-        undo_icon = QIcon.fromTheme("edit-undo")
-        undo_action = QAction(undo_icon, 'Undo', self)
-        undo_action.triggered.connect(self.undo)
-        self.toolbar.addAction(undo_action)
+        self.new_action = QAction('New', self)
+        self.new_action.triggered.connect(self.newFile)
 
-        # Redo
-        redo_icon = QIcon.fromTheme("edit-redo")
-        redo_action = QAction(redo_icon, 'Redo', self)
-        redo_action.triggered.connect(self.redo)
-        self.toolbar.addAction(redo_action)
+        self.undo_action = QAction('Undo', self)
+        self.undo_action.triggered.connect(self.metapad.undo)
 
-        # Save
-        save_icon = QIcon.fromTheme("document-save")
-        save_action = QAction(save_icon, 'Save', self)
-        save_action.triggered.connect(self.saveFile)
-        self.toolbar.addAction(save_action)
+        self.redo_action = QAction('Redo', self)
+        self.redo_action.triggered.connect(self.metapad.redo)
 
-        # Print
-        print_icon = QIcon.fromTheme("document-print")
-        print_action = QAction(print_icon, 'Print', self)
-        print_action.triggered.connect(self.printing)
-        self.toolbar.addAction(print_action)
+        self.save_action = QAction('Save', self)
+        self.save_action.triggered.connect(self.saveFile)
 
-        # Font
-        font_icon = QIcon.fromTheme("preferences-desktop-font")
-        font_action = QAction(font_icon, 'Font', self)
-        font_action.triggered.connect(self.changeFont)
-        self.toolbar.addAction(font_action)
+        self.print_action = QAction('Print (Preview)', self)
+        self.print_action.triggered.connect(self.printPreview)
 
-        # Exit
-        close_icon = QIcon.fromTheme("application-exit")
-        close_action = QAction(close_icon, 'Exit', self)
-        close_action.triggered.connect(self.close)
-        self.toolbar.addAction(close_action)
+        self.print_direct_action = QAction('Print (Direct)', self)
+        self.print_direct_action.triggered.connect(self.printDirect)
 
-        # -------- Create a second toolbar for file address info --------
-        self.address_toolbar = QToolBar("File Path")
-        self.addToolBar(self.address_toolbar)
-        self.address = QLabel()
-        self.address.setText('')
-        self.address_toolbar.addWidget(self.address)
+        self.font_action = QAction('Font', self)
+        self.font_action.triggered.connect(self.changeFont)
 
-        # -------- Menubar setup --------
+        self.exit_action = QAction('Exit', self)
+        self.exit_action.triggered.connect(self.close)   # call the *base* close(), no custom override
+
+        for act in (self.open_action, self.new_action, self.undo_action, self.redo_action,
+                    self.save_action, self.print_action, self.font_action, self.exit_action,
+                    self.print_direct_action):
+            self.toolbar.addAction(act)
+
         menubar = self.menuBar()
 
-        # File menu
         file_menu = menubar.addMenu("File")
-        file_menu.addAction(new_action)  # New action added
-        file_menu.addAction(open_action)
-        file_menu.addAction(save_action)
-        file_menu.addAction(print_action)
+        file_menu.addAction(self.new_action)
+        file_menu.addAction(self.open_action)
+        file_menu.addAction(self.save_action)
+        file_menu.addAction(self.print_action)
+        file_menu.addAction(self.print_direct_action)
         file_menu.addSeparator()
-        file_menu.addAction(close_action)
+        file_menu.addAction(self.exit_action)
 
-        # Edit menu
         edit_menu = menubar.addMenu("Edit")
-        # Find & Replace
+
         find_replace_action = QAction("Find & Replace", self)
         find_replace_action.triggered.connect(self.openFindReplaceDialog)
         edit_menu.addAction(find_replace_action)
 
-        # Go to line
         goto_line_action = QAction("Go to Line", self)
         goto_line_action.triggered.connect(self.gotoLine)
         edit_menu.addAction(goto_line_action)
 
-        # Word Wrap Toggle
         self.word_wrap_action = QAction("Word Wrap", self, checkable=True)
-        self.word_wrap_action.setChecked(True)  # start with wrap on
+        self.word_wrap_action.setChecked(True)
         self.word_wrap_action.triggered.connect(self.toggleWordWrap)
         edit_menu.addAction(self.word_wrap_action)
 
         edit_menu.addSeparator()
-        edit_menu.addAction(undo_action)
-        edit_menu.addAction(redo_action)
+        edit_menu.addAction(self.undo_action)
+        edit_menu.addAction(self.redo_action)
 
-        # Help menu
         help_menu = menubar.addMenu("Help")
         about_action = QAction("About", self)
         about_action.triggered.connect(self.showAbout)
         help_menu.addAction(about_action)
 
-        # -------- Status Bar (Line/Column) --------
-        self.status = self.statusBar()
-        self.status.showMessage("Ready")
+        self.toggleWordWrap()
 
-        # Connect our custom signal from Metapad to update the status bar
-        self.metapad.cursorPositionChangedSignal.connect(self.updateStatusBar)
-
-        # -------- Set central widget --------
-        self.setCentralWidget(self.metapad)
-
-        # -------- Styling --------
+    def applyStyles(self):
+        # White-paper / native-light feel
         self.setStyleSheet("""
-            background-color: #434C5E; 
-            color: #FAFAFA; 
-            border: 1px solid #393F4B; 
-            border-radius: 6px; 
-            font-size: 14px; 
-            selection-background-color: #2B3345; 
-            padding: 6px; 
+            QMainWindow {
+                background-color: #ffffff;
+                color: #222222;
+            }
+            QToolBar {
+                background: #f7f7f7;
+                border-bottom: 1px solid #dddddd;
+                spacing: 6px;
+            }
             QToolBar QToolButton {
-                background-color: #5E6977; 
-                color: #FFFFFF; 
-                border: 1px solid #505C6C; 
-                font-weight: 500; 
-                padding: 4px; 
-                margin: 3px; 
-                min-width: 18px; 
-                min-height: 18px; 
-                border-radius: 4px; 
+                background: #ffffff;
+                color: #222222;
+                border: 1px solid #dcdcdc;
+                padding: 4px 8px;
+                margin: 4px 3px;
+                border-radius: 4px;
             }
             QToolBar QToolButton:hover {
-                background-color: #697885; 
+                background: #f0f0f0;
+                border: 1px solid #d0d0d0;
             }
-            QMenu::item:selected { 
-                background-color: #5E6977; 
+            QMenuBar {
+                background: #ffffff;
+                color: #222222;
+                border-bottom: 1px solid #e6e6e6;
             }
-            QMenu::item:hover { 
-                background-color: #6C7684; 
+            QMenuBar::item:selected {
+                background: #e9f2ff;
+            }
+            QMenu {
+                background: #ffffff;
+                color: #222222;
+                border: 1px solid #e6e6e6;
+            }
+            QMenu::item:selected {
+                background: #e9f2ff;
+            }
+            QStatusBar {
+                background: #ffffff;
+                color: #555555;
+                border-top: 1px solid #e6e6e6;
             }
         """)
         self.metapad.setStyleSheet("""
             QPlainTextEdit {
-                background-color: #343D4C; 
-                color: #F5F5F5; 
-                border: 1px solid #2D3643; 
-                border-radius: 6px; 
-                font-size: 15px; 
-                selection-background-color: #abbac4; 
-                padding: 6px;
+                background-color: #ffffff;
+                color: #111111;
+                border: 1px solid #dddddd;
+                border-radius: 6px;
+                font-size: 14px;
+                selection-background-color: #cfe8ff;
+                selection-color: #000000;
+                padding: 10px;
             }
         """)
 
-        # Default font
-        font = QFont()
-        font.setPointSize(14)
-        self.setFont(font)
+    def centerOnScreen(self):
+        if USING_QT6:
+            screen_geo = QApplication.primaryScreen().availableGeometry()
+            self.move(screen_geo.center() - self.rect().center())
+        else:
+            self.move(QApplication.desktop().screen().rect().center() - self.rect().center())
 
-        # Keep reference to Find & Replace dialog
-        self.find_replace_dialog = None
-
-        # Check if a file was passed as argument and open it
-        if len(sys.argv) > 1:
-            self.openFileFromCommandLine(sys.argv[1])
-
-    # ----- New File Method -----
-    def newFile(self):
-        """Create a new empty file."""
-        reply = QMessageBox.question(self, 'New File',
-                                     'Do you want to discard changes and start a new file?',
-                                     QMessageBox.Yes | QMessageBox.No)
-        if reply == QMessageBox.Yes:
-            self.metapad.clear()  # Clear the editor contents
-            self.address.setText('New File')  # Reset file path label
-
-    # ----- Additional Feature Methods -----
-
+    # ---- Feature methods ----
     def updateStatusBar(self, line, col):
         self.status.showMessage(f"Line: {line}, Col: {col}")
 
     def toggleWordWrap(self):
         if self.word_wrap_action.isChecked():
-            self.metapad.setLineWrapMode(QPlainTextEdit.WidgetWidth)
+            if USING_QT6:
+                self.metapad.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
+            else:
+                self.metapad.setLineWrapMode(QPlainTextEdit.WidgetWidth)
         else:
-            self.metapad.setLineWrapMode(QPlainTextEdit.NoWrap)
+            if USING_QT6:
+                self.metapad.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
+            else:
+                self.metapad.setLineWrapMode(QPlainTextEdit.NoWrap)
 
     def gotoLine(self):
         line, ok = QInputDialog.getInt(self, "Go to Line", "Line number:", 1, 1)
         if ok and line > 0:
-            cursor = self.metapad.textCursor()
             block_count = self.metapad.blockCount()
             if line <= block_count:
-                cursor.movePosition(QTextCursor.Start)
-                cursor.movePosition(QTextCursor.Down, QTextCursor.MoveAnchor, line - 1)
+                cursor = self.metapad.textCursor()
+                if USING_QT6:
+                    cursor.movePosition(QTextCursor.MoveOperation.Start)
+                    cursor.movePosition(QTextCursor.MoveOperation.Down,
+                                        QTextCursor.MoveMode.MoveAnchor, line - 1)
+                else:
+                    cursor.movePosition(QTextCursor.Start)
+                    cursor.movePosition(QTextCursor.Down,
+                                        QTextCursor.MoveAnchor, line - 1)
                 self.metapad.setTextCursor(cursor)
 
     def openFindReplaceDialog(self):
@@ -470,16 +525,18 @@ class MainWindow(QMainWindow):
         self.find_replace_dialog.activateWindow()
 
     def openFileFromCommandLine(self, filepath):
-        """Open file from command-line argument."""
         if os.path.exists(filepath):
-            with open(filepath, 'r', encoding='utf-8', errors='ignore') as file:
-                self.metapad.setPlainText(file.read())
-            self.address.setText(f'Now viewing: {os.path.basename(filepath)}')
+            try:
+                with open(filepath, 'r', encoding='utf-8', errors='ignore') as file:
+                    self.metapad.setPlainText(file.read())
+                self.address.setText(f'Now viewing: {os.path.basename(filepath)}')
+            except Exception as e:
+                QMessageBox.warning(self, "File Open Error", f"Failed to open file:\n{e}", MB_OK)
         else:
-            QMessageBox.warning(self, "File Not Found", f"Cannot find file: {filepath}")
+            QMessageBox.warning(self, "File Not Found", f"Cannot find file: {filepath}", MB_OK)
 
     def changeFont(self):
-        font, ok = QFontDialog.getFont(self.metapad.font(), self, 
+        font, ok = QFontDialog.getFont(self.metapad.font(), self,
                                        'Select a font (applies to selected text if present).')
         if ok:
             cursor = self.metapad.textCursor()
@@ -488,42 +545,32 @@ class MainWindow(QMainWindow):
             cursor.mergeCharFormat(fmt)
             self.metapad.setTextCursor(cursor)
 
-    def undo(self):
-        self.metapad.undo()
-
-    def redo(self):
-        self.metapad.redo()
-
-    def closeEvent(self, event):
-        buttonReply = QMessageBox.question(self.metapad, 'Quit now?',
-                                           "All unsaved documents will be lost. "
-                                           "If unsure press Cancel now.",
-                                           QMessageBox.Cancel | QMessageBox.Ok)
-        if buttonReply == QMessageBox.Ok:
-            print('Ok clicked, messagebox closed.')
-            event.accept()
-            print("\nProgram ends. Goodbye.\n")
-        else:
-            print("Do not quit. --> Going back to the program.")
+    def newFile(self):
+        reply = QMessageBox.question(self, 'New File',
+                                     'Do you want to discard changes and start a new file?',
+                                     MB_YES | MB_NO)
+        if reply == MB_YES:
+            self.metapad.clear()
+            self.address.setText('New File')
 
     def openFile(self):
         try:
-            options = QFileDialog.Options()
-            options |= QFileDialog.DontUseNativeDialog
-            fileName, _ = QFileDialog.getOpenFileName(self.metapad,
-                                                      "Open a file",
-                                                      "",
-                                                      "All Files (*);;Text Files (*.txt);;"
-                                                      "Python Files (*.py);;C++ Files (*.cpp);;"
-                                                      "Bash Files (*.sh);;Javascript Files (*.js);;"
-                                                      "Odt text files (*.odt)",
-                                                      options=options)
+            options = file_dialog_options()
+            fileName, _ = QFileDialog.getOpenFileName(
+                self.metapad, "Open a file", "",
+                "All Files (*);;Text Files (*.txt);;"
+                "Python Files (*.py);;C++ Files (*.cpp);;"
+                "Bash Files (*.sh);;Javascript Files (*.js);;"
+                "Odt text files (*.odt)",
+                options=options
+            )
             if fileName:
-                buttonReply = QMessageBox.question(self.metapad, 'Open new file?',
-                                                   "All unsaved documents will be lost. "
-                                                   "If unsure press Cancel now.",
-                                                   QMessageBox.Cancel | QMessageBox.Ok)
-                if buttonReply == QMessageBox.Ok:
+                buttonReply = QMessageBox.question(
+                    self.metapad, 'Open new file?',
+                    "All unsaved documents will be lost. If unsure press Cancel now.",
+                    MB_CANCEL | MB_OK
+                )
+                if buttonReply == MB_OK:
                     with open(fileName, 'r', encoding='utf-8', errors='ignore') as f:
                         alltxt = f.read()
                         self.metapad.setPlainText(alltxt)
@@ -534,16 +581,15 @@ class MainWindow(QMainWindow):
 
     def saveFile(self):
         try:
-            options = QFileDialog.Options()
-            options |= QFileDialog.DontUseNativeDialog
-            fileName, _ = QFileDialog.getSaveFileName(self.metapad,
-                                                      "Save as",
-                                                      "",
-                                                      "All Files (*);;Text Files (*.txt);;"
-                                                      "Python Files (*.py);;C++ Files (*.cpp);;"
-                                                      "Bash Files (*.sh);;Javascript Files (*.js);;"
-                                                      "Odt text Files (*.odt)",
-                                                      options=options)
+            options = file_dialog_options()
+            fileName, _ = QFileDialog.getSaveFileName(
+                self.metapad, "Save as", "",
+                "All Files (*);;Text Files (*.txt);;"
+                "Python Files (*.py);;C++ Files (*.cpp);;"
+                "Bash Files (*.sh);;Javascript Files (*.js);;"
+                "Odt text Files (*.odt)",
+                options=options
+            )
             if fileName:
                 with open(fileName, 'w', encoding='utf-8') as f:
                     f.write(self.metapad.toPlainText())
@@ -552,31 +598,80 @@ class MainWindow(QMainWindow):
         except Exception as e:
             print("Cannot handle, Will not continue. Error:", e)
 
-    def printing(self):
-        preview = QPrintPreviewDialog()
-        preview.paintRequested.connect(lambda x: self.metapad.print_(x))
-        preview.exec_()
+    # --- Printing helpers (CSS/palette safety — on white theme this is mostly a no-op) ---
+    def _print_to_printer(self, printer):
+        """
+        Ensure black text on white during print/preview.
+        """
+        old_style = self.metapad.styleSheet()
+        old_pal = self.metapad.palette()
 
-    def close(self):
-        buttonReply = QMessageBox.question(self.metapad, 'Quit now?',
-                                           "All unsaved documents will be lost. "
-                                           "If unsure press Cancel now.",
-                                           QMessageBox.Cancel | QMessageBox.Ok)
-        if buttonReply == QMessageBox.Ok:
-            print('Ok clicked, messagebox closed.')
-            QApplication.instance().quit()
-            print("\nProgram ends. Goodbye.\n")
+        try:
+            pal = QPalette(old_pal)
+            if USING_QT6:
+                pal.setColor(QPalette.ColorRole.Text, QColor("black"))
+                pal.setColor(QPalette.ColorRole.Base, QColor("white"))
+                pal.setColor(QPalette.ColorRole.Window, QColor("white"))
+            else:
+                pal.setColor(QPalette.Text, QColor("black"))
+                pal.setColor(QPalette.Base, QColor("white"))
+                pal.setColor(QPalette.Window, QColor("white"))
+            self.metapad.setPalette(pal)
+            self.metapad.setStyleSheet("QPlainTextEdit { color:#000; background:#fff; }")
+            self.metapad.document().print(printer)
+        finally:
+            self.metapad.setStyleSheet(old_style)
+            self.metapad.setPalette(old_pal)
+
+    def printPreview(self):
+        try:
+            mode = getattr(QPrinter, "PrinterMode", None)
+            if mode is not None:  # Qt6
+                printer = QPrinter(QPrinter.PrinterMode.HighResolution)
+            else:  # Qt5
+                printer = QPrinter(QPrinter.HighResolution)
+
+            preview = QPrintPreviewDialog(printer, self)
+            preview.paintRequested.connect(self._print_to_printer)
+            if hasattr(preview, "exec"):
+                preview.exec()
+            else:
+                preview.exec_()
+        except Exception as e:
+            QMessageBox.critical(self, "Print Error", str(e), MB_OK)
+
+    def printDirect(self):
+        try:
+            mode = getattr(QPrinter, "PrinterMode", None)
+            if mode is not None:  # Qt6
+                printer = QPrinter(QPrinter.PrinterMode.HighResolution)
+            else:  # Qt5
+                printer = QPrinter(QPrinter.HighResolution)
+
+            dlg = QPrintDialog(printer, self)
+            accepted = dlg.exec() if hasattr(dlg, "exec") else dlg.exec_()
+            if accepted:
+                self._print_to_printer(printer)
+        except Exception as e:
+            QMessageBox.critical(self, "Print Error", str(e), MB_OK)
+
+    # --- Single confirmation on close (fixes "must press Exit twice") ---
+    def closeEvent(self, event):
+        resp = QMessageBox.question(self, 'Quit now?',
+                                    "All unsaved documents will be lost. If unsure press Cancel now.",
+                                    MB_CANCEL | MB_OK)
+        if resp == MB_OK:
+            event.accept()
         else:
-            print("Do not quit. --> Going back to the program.")
+            event.ignore()
 
     def showAbout(self):
-        QMessageBox.information(self, "About Metapad v3.1",
-                                "Metapad v3.1\n\n"
+        QMessageBox.information(self, "About Metapad",
+                                "Metapad v4 (white-paper UI)\n\n"
                                 "Copyright (c) 2017 JJ Posti <techtimejourney.net>\n"
-                                "Improved Features Example\n\n"
-                                "This program comes with ABSOLUTELY NO WARRANTY.\n"
-                                "Distributed under GPL v2.\n\n"
-                                "https://www.gnu.org/licenses/old-licenses/gpl-2.0.html")
+                                "Cross-compatible PyQt5/6 version.\n"
+                                "Distributed under GPL v2.",
+                                MB_OK)
 
 
 # ---- Main Entry Point ----
@@ -584,8 +679,8 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
-
-    # Optional: Zoom the text a bit for readability
-    window.metapad.zoomIn(1)
-
-    sys.exit(app.exec_())
+    try:
+        window.metapad.zoomIn(1)
+    except Exception:
+        pass
+    sys.exit(app.exec() if USING_QT6 else app.exec_())

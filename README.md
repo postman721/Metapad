@@ -1,71 +1,102 @@
-# Metapad v 3.1
+# Metapad v4
 
-![Image](https://github.com/user-attachments/assets/f96b33de-4ebb-476b-995c-f0a86bc0d6fd)
+Metapad is a lightweight text editor built with PyQt, now compatible with **PyQt6 and PyQt5** from the same codebase. It features line numbers, a clean “white-paper” UI, minimal syntax highlighting, Find/Replace, Go To Line, word wrap, and reliable printing (Preview + Direct).
 
-Metapad is a robust PyQt5-based text editor that aims to provide a simple yet efficient interface for reading and writing text files. It comes with features such as line numbers, basic text formatting, and an intuitive toolbar for quick actions.
+<img width="899" height="667" alt="Image" src="https://github.com/user-attachments/assets/4721799c-d255-4844-b927-cb21f6b11aaf" />
 
+---
 
-#### Metapad 3.1
+## What’s new in version 4
 
-        python3 metapad.py filename_to_open
-Added open new empty file to menu seciton.
+- **PyQt6 / PyQt5 auto-detect**  
+  Tries PyQt6 first, falls back to PyQt5 automatically—no code changes needed.
 
+- **White-paper UI**  
+  Clean light theme optimized for readability (black text on white, subtle greys for chrome).
 
-### Metapad 3.0
+- **Print Preview & Direct Print that always show text**  
+  Temporary palette/CSS switch ensures black-on-white output so previews aren’t “blank” even if your theme changes.
 
-Highlights of the Improvements
+- **Single-confirmation Exit**  
+  Close confirmation handled once via `closeEvent`—no more “press Exit twice”.
 
-    Syntax Highlighter (PythonHighlighter):
-    A minimalist approach to color Python keywords, comments, and strings. If you open a non-Python file, it will still attempt to highlight based on these simple rules. You can remove or adapt this to your own language rules.
+- **Robust file dialogs**  
+  Safer cross-version options for `QFileDialog` (no `Options()` AttributeError).
 
-    Find & Replace Dialog (FindReplaceDialog):
-    Provides basic functionality:
-        Find next
-        Replace one
-        Replace all
-        Case sensitivity checkbox
+- **Minimal highlighter (Python)**  
+  Comments & strings only. **Keywords highlighting removed** by request.
 
-    Word Wrap Toggle:
-    A simple checkable action that toggles between WidgetWidth (wrap on) and NoWrap.
+- **“New File” in File menu**  
+  Quickly clear the editor to start fresh.
 
-    Go To Line:
-    Prompts the user for a line number and moves the cursor there.
+- **Address bar**  
+  Shows the current file name at a glance.
 
-    Status Bar Updates:
-    Shows current line and column. Updated via a custom signal cursorPositionChangedSignal from the text editor.
+---
 
-
-
-
-## Features:
-- **Line Numbers**: Clearly visualized line numbers next to your text.
-- **Toolbar**: A toolbar for quick actions such as undo, redo, save, open, print, and font selection.
-- **Styling**: Custom styling for the editor and the application, done via CSS styling. Icons are from Adwaita icons theme. Without icons a button with a text will be shown.
-- **Font Change**: Quickly change the font of the selected text.
-- **Open/Save Dialog**: Intuitive dialogs for opening and saving your files.
-- **Printing**: A print preview and printing capability.
-- **Protection**: Before closing or opening new files, a warning is given if there are unsaved changes.
-
-## Dependencies:
-
-- **PyQt5**: For the main GUI components.
-- **PyQt5.QtPrintSupport**: For print preview and printing capabilities.
-- **subprocess, os, sys**: Other Python libraries for various tasks.
-
-## Copyright:
-
-Metapad v.2.0 is Copyright (c) 2017 by JJ Posti <techtimejourney.net>. This program comes with ABSOLUTELY NO WARRANTY; for details see: http://www.gnu.org/copyleft/gpl.html. Metapad is free software, and you are welcome to redistribute it under GPL Version 2, June 1991.
-
-## Installation:
-
-Before you run Metapad, ensure you have the required dependencies installed.
+## Quick start
 
 ```bash
-pip install PyQt5
+python3 metapad.py [optional_filename]
+```
 
-Debian/Ubuntu:
+Examples:
+```bash
+python3 metapad.py
 
-sudo apt-get install python3-pyqt5
-sudo apt-get install adwaita-icon-theme
+python3 metapad.py notes.txt
+```
 
-Running example: python3 metapad.py
+---
+
+## Features
+
+- **Line Numbers** in a subtle light-grey gutter.
+- **Toolbar & Menus**: New, Open, Save, Undo/Redo, Print (Preview/Direct), Font, Exit.
+- **Find & Replace** (modeless): Find next, Replace one, Replace all, Case sensitivity.
+- **Go To Line**: Jump directly to a line number.
+- **Word Wrap**: Toggle between wrap/no-wrap.
+- **Status Bar**: Live line/column indicator.
+- **Address Bar**: Shows current file name.
+- **Font Picker**: Apply a font to selected text.
+- **Printing**:  
+  - **Print Preview** and **Direct Print** via Qt Print Support.  
+  - Ensures readable black-on-white output regardless of editor styling.
+- **Safety prompts**: Confirmation before exiting and before replacing the current document when opening another file.
+
+---
+
+## Compatibility & Dependencies
+
+Metapad runs with **either** PyQt6 **or** PyQt5.
+
+- **Recommended (any OS via pip):**
+  ```bash
+  # Pick one:
+  pip install PyQt6
+  # or
+  pip install PyQt5
+  ```
+
+- **Debian/Ubuntu (APT):**
+  ```bash
+  sudo apt-get install python3-pyqt6   # or: python3-pyqt5
+  ```
+
+If both PyQt6 and PyQt5 are installed, Metapad will prefer **PyQt6**.
+
+---
+
+## Notes
+
+- Printing uses Qt’s print pipeline and temporarily switches the editor to a black-on-white palette so the text is always visible on paper/PDF.
+- Minimal syntax highlighter targets Python: **comments & strings only** by design (keywords removed).
+- Open via CLI argument or start blank and use File → Open/New.
+
+---
+
+## License & Copyright
+
+Metapad © 2017–2025 JJ Posti <techtimejourney.net>  
+This program comes with ABSOLUTELY NO WARRANTY; see: http://www.gnu.org/copyleft/gpl.html  
+Released under **GPL Version 2, June 1991**.
